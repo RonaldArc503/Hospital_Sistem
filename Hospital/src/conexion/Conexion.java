@@ -16,6 +16,7 @@ public class Conexion {
             Class.forName("oracle.jdbc.driver.OracleDriver");
             // Establecer conexión con Oracle (ajusta la URL, usuario y contraseña según tu configuración)
             conn = DriverManager.getConnection("jdbc:oracle:thin:@192.168.1.16:1521:xe", "system", "ronald2003");
+            //modificar con tu ip y credenciales
             stm = this.conn.createStatement();
             System.out.println("Conexión exitosa a la base de datos.");
         } catch (Exception e) {

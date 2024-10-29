@@ -1,5 +1,7 @@
 package conexion;
 
+import Clases.Hospital;
+import Clases.Empleados;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,7 +17,7 @@ public class Conexion {
             // Cargar el driver de Oracle
             Class.forName("oracle.jdbc.driver.OracleDriver");
             // Establecer conexión con Oracle (ajusta la URL, usuario y contraseña según tu configuración)
-            conn = DriverManager.getConnection("jdbc:oracle:thin:@192.168.1.16:1521:xe", "system", "ronald2003");
+            conn = DriverManager.getConnection("jdbc:oracle:thin:@192.168.3.1:1521:XE", "system", "ronald2003");
             //modificar con tu ip y credenciales
             stm = this.conn.createStatement();
             System.out.println("Conexión exitosa a la base de datos.");
@@ -68,4 +70,75 @@ public class Conexion {
             System.out.println("No ha conexion :/");
         }
     }
+    
+ // Método para consultar hospitales con INNER JOIN
+public ArrayList<Hospital> consultarHospitales() {
+    try {
+        // Consulta con INNER JOIN para obtener los nombres de las tablas relacionadas
+        ResultSet rs = this.consultar("SELECT h.nombre, h.direccion, h.capacidad_cuartos, h.capacidad_pacientes, "
+                + "tp.tipo AS tipoPrograma, d.departamento AS departamento, "
+                + "m.municipio AS municipio, am.nombre AS equipoMedico "
+                + "FROM Hospitales h "
+                + "INNER JOIN Tipo_Programa tp ON h.idTipoPrograma = tp.idTipoPrograma "
+                + "INNER JOIN Departamentos d ON h.idDepartamento = d.idDepartamento "
+                + "INNER JOIN Municipios m ON h.idMunicipio = m.idMunicipio "
+                + "INNER JOIN Almacen_Medico am ON h.idEquipo = am.idEquipo");
+
+        ArrayList<Hospital> listaHospitales = new ArrayList<>();
+
+        while (rs.next()) {
+            Hospital hospital = new Hospital(
+                rs.getString("nombre"),
+                rs.getString("direccion"),
+                rs.getInt("capacidad_cuartos"),
+                rs.getInt("capacidad_pacientes"),
+                rs.getString("tipoPrograma"),
+                rs.getString("departamento"),
+                rs.getString("municipio"),
+                rs.getString("equipoMedico")
+            );
+            listaHospitales.add(hospital);
+        }
+
+        return listaHospitales;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+
+// Método para consultar empleados con INNER JOIN
+public ArrayList<Empleados> consultarEmpleados() {
+    try {
+        // Consulta con INNER JOIN para obtener los datos de usuario sin mostrar los ID
+        ResultSet rs = this.consultar("SELECT u.nombre AS nombreUsuario, u.apellido, u.correo, "
+                + "a.area, c.cargo, e.telefono, e.edad "
+                + "FROM Empleado e "
+                + "INNER JOIN Usuarios u ON e.idUsuario = u.idUsuario "
+                + "INNER JOIN Areas a ON e.idArea = a.idArea "
+                + "INNER JOIN Cargo c ON e.idCargo = c.idCargo");
+
+        ArrayList<Empleados> listaEmpleados = new ArrayList<>();
+
+        while (rs.next()) {
+            Empleados empleado = new Empleados(
+                rs.getString("nombreUsuario"),
+                rs.getString("apellido"),
+                rs.getString("correo"),
+                rs.getString("telefono"), // Asegúrate de que el orden y los nombres coincidan
+                rs.getInt("edad"),
+                rs.getString("area"),
+                rs.getString("cargo")
+            );
+            listaEmpleados.add(empleado);
+        }
+
+        return listaEmpleados;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+
+
 }
